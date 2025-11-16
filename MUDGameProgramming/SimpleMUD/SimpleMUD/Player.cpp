@@ -15,13 +15,18 @@
 #include "Player.h"
 #include "SimpleMUDLogs.h"
 
+using namespace SocketLib;
+using namespace BasicLib;
+using std::string;
+
 namespace SimpleMUD {
 
 Player::Player()
     : m_pass("UNDEFINED"), m_rank(REGULAR), m_connection(0), m_loggedin(false),
       m_active(false), m_newbie(true), m_experience(0), m_level(1), m_room(1),
       m_money(0), m_nextattacktime(0), m_items(0), m_weapon(-1), m_armor(-1),
-      m_statpoints(18), m_attributes(), m_baseattributes(), m_hitpoints() {
+      m_statpoints(18), m_attributes(), m_baseattributes(), m_hitpoints(),
+      m_class(CLASS_NONE) {
 
   m_baseattributes[STRENGTH] = 1;
   m_baseattributes[HEALTH] = 1;
@@ -29,6 +34,21 @@ Player::Player()
 
   RecalculateStats();
   m_hitpoints = GetAttr(MAXHITPOINTS);
+}
+
+void Player::SetClass(PlayerClass c)
+{
+  if (m_class != CLASS_NONE) {
+      SendString(red + "You already have a class and cannot change it." + newline);
+      return;
+  }  
+  if (m_level < 5) {
+      SendString(red + "You can only choose a class once you reach level 5." + newline);
+      return;
+  }
+  m_class = c;
+  RecalculateStats();
+  SendString(green + "Congratulations! You are now class: " + ClassName() + newline);
 }
 
 int Player::NeedForNextLevel() {
@@ -42,6 +62,12 @@ bool Player::Train() {
     m_baseattributes[MAXHITPOINTS] += m_level;
     m_level++;
     RecalculateStats();
+
+    if (m_level == 5 && m_class == CLASS_NONE) {
+        SendString(yellow + "You reached level 5! You may now choose a class." + newline);
+        SendString("Type: setclass DESTRUIR | RESTAURAR | INFILTRAR" + newline);
+    }
+
     return true;
   } else {
     return false;
@@ -62,6 +88,28 @@ void Player::RecalculateStats() {
   // make sure the hitpoints don't overflow if your max goes down
   if (m_hitpoints > GetAttr(MAXHITPOINTS))
     m_hitpoints = GetAttr(MAXHITPOINTS);
+
+    switch(m_class) {
+      case CLASS_DESTRUIR:
+        m_attributes[STRIKEDAMAGE] =
+            static_cast<int>(m_attributes[STRIKEDAMAGE] * 1.10);
+        m_attributes[ACCURACY] += 5;
+        break;
+
+      case CLASS_RESTAURAR:
+        m_attributes[HPREGEN] =
+            static_cast<int>(m_attributes[HPREGEN] * 1.15);
+        m_attributes[DAMAGEABSORB] += 5;
+        break;
+
+      case CLASS_INFILTRAR:
+        m_attributes[DODGING] += 10;
+        m_attributes[ACCURACY] += 5;
+        break;
+
+      default:
+        break;
+    }
 
   if (Weapon() != 0)
     AddDynamicBonuses(Weapon());

@@ -6,6 +6,7 @@ CREATE TYPE DIRECTIONS AS ENUM ('NORTH', 'EAST', 'SOUTH', 'WEST');
 CREATE TYPE MAPTYPE AS ENUM ('PLAINROOM', 'TRAININGROOM', 'STORE');
 CREATE TYPE ITEMTYPE AS ENUM ('HEALING', 'WEAPON', 'ARMOR');
 CREATE TYPE PLAYERRANK AS ENUM ('REGULAR', 'GOD', 'ADMIN');
+CREATE TYPE PLAYERCLASS AS ENUM ('DESTRUIR', 'RESTAURAR', 'INFILTRAR', 'NONE');
 
 CREATE TYPE ATTRIBUTE AS (
     strength INTEGER,
@@ -134,13 +135,14 @@ CREATE TABLE Player(
     id BIGINT,
     name TEXT UNIQUE NOT NULL,
     pass TEXT,
-    rank PLAYERRANK,
+    rank PLAYERRANK, -- pra que
+    class PLAYERCLASS DEFAULT 'NONE',
     statPoints INTEGER,
     experience INTEGER,
     level INTEGER,
     mapId BIGINT NOT NULL,
     money UBIGINT,
-    hitPoints INTEGER,
+    hitPoints INTEGER, --still has
     nextAttackTime BIGINT,
     attributes ATTRIBUTE,
     weaponId BIGINT,
@@ -158,4 +160,36 @@ CREATE TABLE Inventory(
 
     CONSTRAINT Inventory_Player_FK FOREIGN KEY(playerId) REFERENCES Player(id),
     CONSTRAINT Inventory_Item_FK FOREIGN KEY(itemId) REFERENCES Item(id)
+);
+
+-- Relação de amizade (bidirecional)
+CREATE TABLE Friendship (
+    playerId BIGINT NOT NULL,
+    friendId BIGINT NOT NULL,
+    createdAt TIMESTAMP DEFAULT now(),
+
+    CONSTRAINT Friendship_Player_FK FOREIGN KEY(playerId) REFERENCES Player(id),
+    CONSTRAINT Friendship_Friend_FK FOREIGN KEY(friendId) REFERENCES Player(id),
+    CONSTRAINT Friendship_UQ UNIQUE (playerId, friendId)
+);
+
+-- Grupos (para etapa 2)
+CREATE TABLE Party (
+    id BIGSERIAL PRIMARY KEY,
+    name TEXT,
+    createdBy BIGINT NOT NULL,
+    createdAt TIMESTAMP DEFAULT now(),
+
+    CONSTRAINT Party_Player_FK FOREIGN KEY(createdBy) REFERENCES Player(id)
+);
+
+-- Jogadores que participam de um grupo
+CREATE TABLE PartyMember (
+    partyId BIGINT NOT NULL,
+    playerId BIGINT NOT NULL,
+    joinedAt TIMESTAMP DEFAULT now(),
+
+    CONSTRAINT PartyMember_Party_FK FOREIGN KEY(partyId) REFERENCES Party(id),
+    CONSTRAINT PartyMember_Player_FK FOREIGN KEY(playerId) REFERENCES Player(id),
+    CONSTRAINT PartyMember_UQ UNIQUE (partyId, playerId)
 );

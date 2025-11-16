@@ -15,6 +15,8 @@
 #include "SimpleMUDLogs.h"
 #include "SocketLib/SocketLib.h"
 #include <string>
+#include "FriendManager.h"
+#include "MessageManager.h"
 
 using SocketLib::Connection;
 using SocketLib::Telnet;
@@ -47,6 +49,7 @@ public:
   void Hungup();
   void Flooded();
   void GotoTrain();
+  void GotoTutorialTrain();
 
   // ------------------------------------------------------------------------
   //  sending functions
@@ -104,6 +107,10 @@ protected:
 
   static BasicLib::Timer s_timer;
   static bool s_running;
+
+  // --- Socialization managers ---
+  FriendManager m_friendManager;
+  MessageManager m_messageManager;
 
 }; // end class Game
 

@@ -56,7 +56,7 @@ void Train::Enter() {
     p.SendString(magenta + bold + "Welcome to SimpleMUD, " + p.Name() +
                  "!\r\n" +
                  "You must train your character with your desired stats,\r\n" +
-                 "before you enter the realm.\r\n\r\n");
+                 "before you enter the grid.\r\n\r\n");
     p.Newbie() = false;
   }
 
@@ -87,7 +87,7 @@ void Train::PrintStats(bool p_clear) {
       "3) Agility:       " + tostring(p.GetAttr(AGILITY)) + "\r\n" + bold +
       "------------------------------------------------------------------------"
       "-------\r\n" +
-      "Enter 1, 2, or 3 to add a stat point, or \"quit\" to enter the realm: ");
+      "Enter 1, 2, or 3 to add a stat point, or \"quit\" to enter the grid: ");
 }
 
 } // end namespace SimpleMUD

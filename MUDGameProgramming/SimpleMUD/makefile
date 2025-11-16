@@ -19,7 +19,7 @@ LIBS = -lpthread -lpqxx -lfmt
 TESTSLIBS = -lgtest
 
 # flags
-CFLAGS = -g -std=c++2a -I$(MUDLIBDIR) # \
+CFLAGS = -g -std=c++11 -I$(MUDLIBDIR) # \
 		-Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wold-style-cast \
 		-Wcast-align -Wunused -Woverloaded-virtual -Wconversion \
 		-Wsign-conversion -Wmisleading-indentation -Weffc++ -pedantic

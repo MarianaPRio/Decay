@@ -14,6 +14,11 @@
 #include "RoomDatabase.h"
 #include "StoreDatabase.h"
 #include "Train.h"
+#include "TutorialTrain.h"
+#include "PlayerClass.h"
+#include "FriendManager.h"
+#include "MessageManager.h"
+#include <unistd.h>
 
 using namespace SocketLib;
 using namespace BasicLib;
@@ -69,7 +74,7 @@ void Game::Handle(string p_data) {
 
   if (firstword == "quit") {
     m_connection->Close();
-    LogoutMessage(p.Name() + " has left the realm.");
+    LogoutMessage(p.Name() + " has left the grid.");
     return;
   }
 
@@ -104,6 +109,62 @@ void Game::Handle(string p_data) {
     Whisper(message, name);
     return;
   }
+
+  if (firstword == "addfriend") {
+    string name = ParseWord(p_data, 1);
+    PlayerDatabase::iterator target =
+        PlayerDatabase::GetInstance().findloggedin(name);
+
+    if (target == PlayerDatabase::GetInstance().end()) {
+        p.SendString(red + bold + "Jogador não encontrado.");
+    } else {
+        m_friendManager.AddFriendRequest(&p, &(*target));
+    }
+    return;
+}
+
+if (firstword == "acceptfriend") {
+    string name = ParseWord(p_data, 1);
+    PlayerDatabase::iterator target =
+        PlayerDatabase::GetInstance().findloggedin(name);
+
+    if (target == PlayerDatabase::GetInstance().end()) {
+        p.SendString(red + bold + "Jogador não encontrado.");
+    } else {
+        m_friendManager.AcceptFriend(&p, &(*target));
+    }
+    return;
+}
+
+if (firstword == "friends") {
+    auto list = m_friendManager.GetFriends(p.ID());
+    string msg = bold + cyan + "Seus amigos:\r\n";
+    for (auto fid : list) {
+        PlayerDatabase::iterator f =
+            PlayerDatabase::GetInstance().find(fid);
+        if (f != PlayerDatabase::GetInstance().end()) {
+            msg += " - " + f->Name() + "\r\n";
+        }
+    }
+    p.SendString(msg);
+    return;
+}
+
+if (firstword == "msg") {
+    string name = ParseWord(p_data, 1);
+    string message = RemoveWord(RemoveWord(p_data, 0), 0);
+
+    PlayerDatabase::iterator target =
+        PlayerDatabase::GetInstance().findactive(name);
+
+    if (target == PlayerDatabase::GetInstance().end()) {
+        p.SendString(red + bold + "Jogador não encontrado.");
+    } else {
+        m_messageManager.SendPrivateMessage(&p, &(*target), message);
+    }
+    return;
+}
+
 
   if (firstword == "who") {
     p.SendString(WhoList(BasicLib::LowerCase(ParseWord(p_data, 1))));
@@ -296,6 +357,30 @@ void Game::Handle(string p_data) {
     return;
   }
 
+  if (firstword == "setclass") {
+    string classname = ParseWord(p_data, 1);
+
+    if (classname.empty()) {
+        p.SendString(red + "Usage: setclass <DESTRUIR | RESTAURAR | INFILTRAR>");
+        return;
+    }
+
+    PlayerClass chosen = FromString(classname);
+
+    if (chosen == CLASS_NONE) {
+        p.SendString(red + "Invalid class. Choose: DESTRUIR, RESTAURAR, INFILTRAR.");
+        return;
+    }
+
+    p.SetClass(chosen);
+
+    if (p.Class() == chosen) {
+        p.SendString(green + bold + "You are now " + p.ClassName());
+    }
+
+    return;
+}
+
   // ------------------------------------------------------------------------
   //  Command not recognized, send to room
   // ------------------------------------------------------------------------
@@ -316,10 +401,15 @@ void Game::Enter() {
   p.Active() = true;
   p.LoggedIn() = true;
 
-  SendGame(bold + green + p.Name() + " has entered the realm.");
+  SendGame("> Initializing DECAY protocol...");
+  SendGame("> Integrity check: unstable.");
+  SendGame("> Connection established.");
 
+  SendGame(bold + green + p.Name() + " has entered");
+  
+  sleep(1);
   if (p.Newbie())
-    GotoTrain();
+    GotoTutorialTrain();
   else
     p.SendString(PrintRoom(p.CurrentRoom()));
 }
@@ -346,7 +436,7 @@ void Game::Hungup() {
               m_player->Name() + " hung up.");
 
   Player &p = *m_player;
-  LogoutMessage(p.Name() + " has suddenly disappeared from the realm.");
+  LogoutMessage(p.Name() + " has suddenly disappeared from the grid.");
 }
 
 // ------------------------------------------------------------------------
@@ -453,7 +543,7 @@ struct wholist {
 };
 
 // ------------------------------------------------------------------------
-//  This prints up the who-list for the realm.
+//  This prints up the who-list for the grid.
 // ------------------------------------------------------------------------
 string Game::WhoList(const string &p_who) {
   using namespace BasicLib;
@@ -493,12 +583,11 @@ string Game::PrintHelp(PlayerRank p_rank) {
       "--------------------------------- Command List "
       "---------------------------------\r\n" +
       " /                          - Repeats your last command exactly.\r\n" +
-      " chat <mesg>                - Sends message to everyone in the "
-      "game\r\n" +
+      " chat <mesg>                - Sends message to everyone in the game\r\n" +
       " experience                 - Shows your experience statistics\r\n" +
       " help                       - Shows this menu\r\n" +
       " inventory                  - Shows a list of your items\r\n" +
-      " quit                       - Allows you to leave the realm.\r\n" +
+      " quit                       - Allows you to leave the grid.\r\n" +
       " remove <'weapon'/'armor'>  - removes your weapon or armor\r\n" +
       " stats                      - Shows all of your statistics\r\n" +
       " time                       - shows the current system time.\r\n" +
@@ -508,19 +597,22 @@ string Game::PrintHelp(PlayerRank p_rank) {
       " who all                    - Shows a list of everyone\r\n" +
       " look                       - Shows you the contents of a room\r\n" +
       " north/east/south/west      - Moves in a direction\r\n" +
-      " get/drop <item>            - Picks up or drops an item on the "
-      "ground\r\n" +
+      " get/drop <item>            - Picks up or drops an item on the ground\r\n" +
       " train                      - Train to the next level (TR)\r\n" +
       " editstats                  - Edit your statistics (TR)\r\n" +
       " list                       - Lists items in a store (ST)\r\n" +
       " buy/sell <item>            - Buy or Sell an item in a store (ST)\r\n" +
-      " attack <enemy>             - Attack an enemy\r\n";
+      " attack <enemy>             - Attack an enemy\r\n" +
+      " addfriend <nome>           - Envia pedido de amizade\r\n" +
+      " acceptfriend <nome>        - Aceita pedido de amizade\r\n" +
+      " friends                    - Mostra sua lista de amigos\r\n" +
+      " msg <nome> <mensagem>      - Envia mensagem privada\r\n";
 
   static string god =
       yellow + bold +
       "--------------------------------- God Commands "
       "---------------------------------\r\n" +
-      " kick <who>                 - kicks a user from the realm\r\n";
+      " kick <who>                 - kicks a user from the grid\r\n";
 
   static string admin =
       green + bold +
@@ -557,6 +649,7 @@ string Game::PrintStats() {
          "----------------------------------\r\n" +
          " Name:          " + p.Name() + "\r\n" +
          " Rank:          " + GetRankString(p.Rank()) + "\r\n" +
+         " Class:         " + p.ClassName() + "\r\n" +
          " HP/Max:        " + tostring(p.HitPoints()) + "/" +
          tostring(p.GetAttr(MAXHITPOINTS)) + "  (" +
          tostring(percent(p.HitPoints(), p.GetAttr(MAXHITPOINTS))) + "%)\r\n" +
@@ -874,6 +967,13 @@ void Game::DropItem(string p_item) {
            p.CurrentRoom());
   p.CurrentRoom()->AddItem(p.GetItem(i));
   p.DropItem(i);
+}
+
+void Game::GotoTutorialTrain() {
+  Player &p = *m_player;
+  p.Active() = false;
+  p.Conn()->AddHandler(new TutorialTrain(*m_connection, p.ID()));
+  LogoutMessage(p.Name() + " leaves to edit stats");
 }
 
 void Game::GotoTrain() {
