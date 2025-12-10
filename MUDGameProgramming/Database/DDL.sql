@@ -4,8 +4,23 @@ CREATE DOMAIN UBIGINT AS BIGINT NOT NULL CHECK(VALUE >= 0) DEFAULT 0;
 
 CREATE TYPE DIRECTIONS AS ENUM ('NORTH', 'EAST', 'SOUTH', 'WEST');
 CREATE TYPE MAPTYPE AS ENUM ('PLAINROOM', 'TRAININGROOM', 'STORE');
+
+CREATE TYPE REGIONTYPE AS ENUM (
+    'NUCLEO_INICIAL',
+    'MALHA_URBANA_ESTATICA',
+    'SUBCAMADAS_PROCESSAMENTO',
+    'SETOR_FLORESTAL_PROCEDURAL',
+    'MAR_DE_DADOS',
+    'NUCLEO_ABISSAL'
+);
+
+CREATE DOMAIN CORRUPTIONLEVEL AS INTEGER
+    CHECK (VALUE BETWEEN 0 AND 5);
+
 CREATE TYPE ITEMTYPE AS ENUM ('HEALING', 'WEAPON', 'ARMOR');
+
 CREATE TYPE PLAYERRANK AS ENUM ('REGULAR', 'GOD', 'ADMIN');
+CREATE TYPE PLAYERCLASS AS ENUM ('DESTRUIR', 'RESTAURAR', 'INFILTRAR', 'NONE');
 
 CREATE TYPE ATTRIBUTE AS (
     strength INTEGER,
@@ -82,6 +97,10 @@ CREATE TABLE Map(
     name TEXT,
     description TEXT,
     type MAPTYPE,
+
+    region REGIONTYPE,
+    corruptionLevel CORRUPTIONLEVEL NOT NULL DEFAULT 0,
+
     storeId BIGINT,
     enemyId BIGINT,
     maxEnemies INTEGER,
@@ -135,6 +154,7 @@ CREATE TABLE Player(
     name TEXT UNIQUE NOT NULL,
     pass TEXT,
     rank PLAYERRANK,
+    class PLAYERCLASS DEFAULT 'NONE',
     statPoints INTEGER,
     experience INTEGER,
     level INTEGER,
@@ -158,4 +178,36 @@ CREATE TABLE Inventory(
 
     CONSTRAINT Inventory_Player_FK FOREIGN KEY(playerId) REFERENCES Player(id),
     CONSTRAINT Inventory_Item_FK FOREIGN KEY(itemId) REFERENCES Item(id)
+);
+
+-- Relação de amizade
+CREATE TABLE Friendship (
+    playerId BIGINT NOT NULL,
+    friendId BIGINT NOT NULL,
+    createdAt TIMESTAMP DEFAULT now(),
+
+    CONSTRAINT Friendship_Player_FK FOREIGN KEY(playerId) REFERENCES Player(id),
+    CONSTRAINT Friendship_Friend_FK FOREIGN KEY(friendId) REFERENCES Player(id),
+    CONSTRAINT Friendship_UQ UNIQUE (playerId, friendId)
+);
+
+-- Grupos
+CREATE TABLE Party (
+    id BIGSERIAL PRIMARY KEY,
+    name TEXT,
+    createdBy BIGINT NOT NULL,
+    createdAt TIMESTAMP DEFAULT now(),
+
+    CONSTRAINT Party_Player_FK FOREIGN KEY(createdBy) REFERENCES Player(id)
+);
+
+-- Jogadores que participam de um grupo
+CREATE TABLE PartyMember (
+    partyId BIGINT NOT NULL,
+    playerId BIGINT NOT NULL,
+    joinedAt TIMESTAMP DEFAULT now(),
+
+    CONSTRAINT PartyMember_Party_FK FOREIGN KEY(partyId) REFERENCES Party(id),
+    CONSTRAINT PartyMember_Player_FK FOREIGN KEY(playerId) REFERENCES Player(id),
+    CONSTRAINT PartyMember_UQ UNIQUE (partyId, playerId)
 );

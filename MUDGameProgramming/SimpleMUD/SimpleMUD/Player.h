@@ -18,6 +18,7 @@
 #include "DatabasePointer.h"
 #include "Entity.h"
 #include "Item.h"
+#include "PlayerClass.h"
 
 using SocketLib::Connection;
 using SocketLib::Telnet;
@@ -108,6 +109,14 @@ public:
   friend std::string DumpSQL(Player &p);
   friend void ParseRow(const pqxx::const_result_iterator::reference &row,
                        Player &p);
+                       
+  // ------------------------------------------------------------------------
+  //  Class Functions
+  // ------------------------------------------------------------------------
+
+  inline PlayerClass& Class() { return m_class; }
+  inline std::string ClassName() const { return ToString(m_class); }
+  void SetClass(PlayerClass c);
 
 protected:
   // -----------------------------------------
@@ -115,6 +124,7 @@ protected:
   // -----------------------------------------
   string m_pass;
   PlayerRank m_rank;
+  PlayerClass m_class;
 
   // -----------------------------------------
   //  Player attributes

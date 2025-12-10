@@ -91,7 +91,7 @@ void PlayerDatabase::SavePlayer(entityid p_player) {
     pqxx::work transactionConnection(dbConnection);
     if (!queryRow["exists"].as<bool>()) {
       sql = fmt::format("INSERT INTO Player VALUES ( "
-                        " {}, '', '', 'REGULAR', "
+                        " {}, '', '', 'REGULAR', 'NONE',"
                         " 0, 0, 1, 1, 0, 10, 0, "
                         " ROW(0, 0, 0, 0, 0, 0, 0, 0, 0), NULL, NULL"
                         ")",

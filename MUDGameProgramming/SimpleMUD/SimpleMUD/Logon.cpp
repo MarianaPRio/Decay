@@ -23,7 +23,7 @@ void Logon::Handle(string p_data) {
   if (m_errors == 5) {
     m_connection->Protocol().SendString(
         *m_connection,
-        red + bold + "Too many incorrect responses, closing connection..." +
+        red + bold + "Too many incorrect responses, closing connection...\r\n" +
             newline);
     m_connection->Close();
     return;
@@ -34,7 +34,17 @@ void Logon::Handle(string p_data) {
     if (BasicLib::LowerCase(p_data) == "new") {
       m_state = NEWUSER;
       m_connection->Protocol().SendString(
-          *m_connection, yellow + "Please enter your desired name: " + reset);
+          *m_connection, 
+          red + " \r\n> Initializing DECAY protocol...\r\n"+
+              "> Warning: corrupted network sectors detected.\r\n"+
+              "> Establishing uplink... ok.\r\n"+
+              "> Running identity injection module...\r\n\r\n"+
+              "You are now interfacing with a decayed fragment of the old network.\r\n"+
+              "No records exist about who built it — or why it's still active.\r\n"+
+              "Every connection leaves a trace, every decision echoes somewhere else.\r\n\r\n"+
+          yellow + "Please enter your desired name: \r\n" + reset);
+    
+    
     } else {
       PlayerDatabase::iterator itr =
           PlayerDatabase::GetInstance().findfull(p_data);
@@ -45,7 +55,7 @@ void Logon::Handle(string p_data) {
             *m_connection,
             red + bold + "Sorry, the user \"" + white + p_data + red +
                 "\" does not exist.\r\n" +
-                "Please enter your name, or \"new\" if you are new: " + reset);
+                "Please enter your name, or \"new\" if you are new: \r\n" + reset);
       } else {
         // name exists, go to password entrance.
         m_state = ENTERPASS;
@@ -53,15 +63,17 @@ void Logon::Handle(string p_data) {
         m_pass = itr->Password();
 
         m_connection->Protocol().SendString(
-            *m_connection, green + bold + "Welcome, " + white + p_data + red +
-                               newline + green +
-                               "Please enter your password: " + reset);
+            *m_connection, green + bold + "Welcome back, " +
+              "Fragments of your last session have been recovered.\r\n" +
+              white + p_data + red +
+              newline + green +
+              "Please enter your password:\r\n " + reset);
       }
     }
 
     return;
   }
-
+  //aqui
   if (m_state == NEWUSER) {
     // check if the name is taken:
     if (PlayerDatabase::GetInstance().hasfull(p_data)) {
@@ -70,20 +82,21 @@ void Logon::Handle(string p_data) {
           *m_connection, red + bold + "Sorry, the name \"" + white + p_data +
                              red + "\" has already been taken." + newline +
                              yellow +
-                             "Please enter your desired name: " + reset);
+                             "Please enter your desired name: \r\n" + reset);
     } else {
       if (!AcceptibleName(p_data)) {
         m_errors++;
         m_connection->Protocol().SendString(
             *m_connection, red + bold + "Sorry, the name \"" + white + p_data +
                                red + "\" is unacceptible." + newline + yellow +
-                               "Please enter your desired name: " + reset);
+                               "Please enter your desired name: \r\n" + reset);
       } else {
         m_state = ENTERNEWPASS;
         m_name = p_data;
         m_connection->Protocol().SendString(
             *m_connection,
-            green + "Please enter your desired password: " + reset);
+            red + " \r\n> Identity fragment accepted.\r\n" +
+            green + "Please enter your desired password: \r\n" + reset);
       }
     }
 
@@ -95,13 +108,13 @@ void Logon::Handle(string p_data) {
       m_errors++;
       m_connection->Protocol().SendString(
           *m_connection, red + bold + "INVALID PASSWORD!" + green +
-                             "Please enter your desired password: " + reset);
+                             "Please enter your desired password: \r\n" + reset);
       return;
     }
 
     m_connection->Protocol().SendString(
         *m_connection,
-        green + "Thank you! You are now entering the realm..." + newline);
+        green + "Thank you! You are now entering the grid...\r\n" + newline);
 
     Player p;
     p.Name() = m_name;
@@ -128,7 +141,7 @@ void Logon::Handle(string p_data) {
     if (m_pass == p_data) {
       m_connection->Protocol().SendString(
           *m_connection,
-          green + "Thank you! You are now entering the realm..." + newline);
+          green + "Thank you! You are now entering the grid...\r\n" + newline);
 
       // enter the game
       GotoGame();
@@ -136,7 +149,7 @@ void Logon::Handle(string p_data) {
       m_errors++;
       m_connection->Protocol().SendString(
           *m_connection, red + bold + "INVALID PASSWORD!" + newline + yellow +
-                             "Please enter your password: " + reset);
+                             "Please enter your password: \r\n" + reset);
     }
 
     return;
@@ -152,8 +165,8 @@ void Logon::Enter() {
 
   m_connection->Protocol().SendString(
       *m_connection,
-      red + bold + "Welcome To SimpleMUD v1.0\r\n" +
-          "Please enter your name, or \"new\" if you are new: " + reset);
+      red + bold + //"Welcome To The Grid v1.0\r\n" +
+          "Please enter your name, or \"new\" if you are new: \r\n" + reset);
 }
 
 // ------------------------------------------------------------------------

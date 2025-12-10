@@ -28,6 +28,19 @@ namespace SimpleMUD {
 // --------------------------------------------------------------------
 //  Class that stores information about rooms
 // --------------------------------------------------------------------
+
+enum RegionType
+{
+  REGION_NUCLEO_INICIAL = 0,
+  REGION_MALHA_URBANA_ESTATICA,
+  REGION_SUBCAMADAS_PROCESSAMENTO,
+  REGION_SETOR_FLORESTAL_PROCEDURAL,
+  REGION_MAR_DE_DADOS,
+  REGION_NUCLEO_ABISSAL,
+  REGION_UNKNOWN
+};
+
+
 class Room : public Entity {
 public:
   Room();
@@ -45,6 +58,9 @@ public:
 
   inline list<enemy> &Enemies() { return m_enemies; }
   inline list<player> &Players() { return m_players; }
+
+  inline RegionType& Region()          { return m_region; }
+  inline int&        CorruptionLevel() { return m_corruptionLevel; }
 
   void AddPlayer(player p_player);
   void RemovePlayer(player p_player);
@@ -76,6 +92,9 @@ protected:
 
   enemytemplate m_spawnwhich;
   int m_maxenemies;
+
+  RegionType   m_region;          // Region of the Grid (DB: region)
+  int          m_corruptionLevel; // 0-5 (DB: corruptionLevel)
 
   // -----------------------------------------
   //  volatile data (save to disk)
