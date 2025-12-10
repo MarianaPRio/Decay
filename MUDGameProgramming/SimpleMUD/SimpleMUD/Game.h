@@ -101,6 +101,8 @@ public:
   void PlayerAttack(const string &p_enemy);
   static void EnemyKilled(enemy p_enemy, player p_player);
 
+  void ApplyBasicAreaCorruptionDamage();
+
 protected:
   player m_player;
   string m_lastcommand;

@@ -37,6 +37,8 @@ bool Game::s_running = false;
 void Game::Handle(string p_data) {
   Player &p = *m_player;
 
+  ApplyBasicAreaCorruptionDamage();
+  
   // check if the player wants to repeat a command
   if (p_data == "/") {
     p_data = m_lastcommand;
@@ -504,6 +506,38 @@ void Game::Whisper(std::string p_str, std::string p_player) {
   }
 }
 
+
+// ---------------------
+//  Area Corruption
+// --------------------
+void Game::ApplyBasicAreaCorruptionDamage()
+{
+  using namespace BasicLib;
+
+  if (m_player == 0)
+    return;
+
+  room &r = m_player->CurrentRoom();
+  if (r == 0)
+    return;
+
+  int corruption = r->CorruptionLevel();
+
+  if (corruption <= 0)
+    return;
+
+  int damage = corruption;
+
+  m_player->AddHitpoints(-damage);
+
+  m_player->SendString(
+      red +
+      ">> Corrupted data from this sector erodes your avatar. [-" +
+      tostring(damage) + " HP]\r\n" +
+      reset);
+}
+
+
 // ------------------------------------------------------------------------
 //  Functor that generates a who-listing for a single player
 // ------------------------------------------------------------------------
@@ -796,9 +830,38 @@ string Game::PrintRoom(room p_room) {
   string temp;
   int count;
 
-  desc += bold + magenta + p_room->Description() + "\r\n";
-  desc += bold + green + "exits: ";
+   static const char* REGION_NAMES[] = {
+      "Initial Core",
+      "Static Urban Mesh",
+      "Processing Sub-layers",
+      "Procedural Forest Sector",
+      "Data Sea",
+      "Abyssal Core",
+      "Unknown Region"
+  };
 
+  static const char* CORRUPTION_TEXT[] = {
+      "System integrity: STABLE",
+      "System integrity: LIGHT DISTORTION",
+      "System integrity: UNSTABLE",
+      "System integrity: HEAVY CORRUPTION",
+      "System integrity: NEAR COLLAPSE",
+      "System integrity: ABYSSAL DECAY"
+  };
+
+  int cl = p_room->CorruptionLevel();
+  if (cl < 0) cl = 0;
+  if (cl > 5) cl = 5;
+
+  desc += bold + cyan +
+          "[Region] " + REGION_NAMES[p_room->Region()] + "\r\n" +
+          "[Status] " + CORRUPTION_TEXT[cl] + "\r\n\r\n";
+
+          
+  // ---------------------------------------------------------
+  // EXITS
+  // ---------------------------------------------------------
+  desc += bold + green + "Exits: ";
   for (int d = 0; d < NUMDIRECTIONS; d++) {
     if (p_room->Adjacent(d) != 0)
       desc += DIRECTIONSTRINGS[d] + "  ";

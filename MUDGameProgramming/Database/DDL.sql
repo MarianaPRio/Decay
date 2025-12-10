@@ -4,7 +4,21 @@ CREATE DOMAIN UBIGINT AS BIGINT NOT NULL CHECK(VALUE >= 0) DEFAULT 0;
 
 CREATE TYPE DIRECTIONS AS ENUM ('NORTH', 'EAST', 'SOUTH', 'WEST');
 CREATE TYPE MAPTYPE AS ENUM ('PLAINROOM', 'TRAININGROOM', 'STORE');
+
+CREATE TYPE REGIONTYPE AS ENUM (
+    'NUCLEO_INICIAL',
+    'MALHA_URBANA_ESTATICA',
+    'SUBCAMADAS_PROCESSAMENTO',
+    'SETOR_FLORESTAL_PROCEDURAL',
+    'MAR_DE_DADOS',
+    'NUCLEO_ABISSAL'
+);
+
+CREATE DOMAIN CORRUPTIONLEVEL AS INTEGER
+    CHECK (VALUE BETWEEN 0 AND 5);
+
 CREATE TYPE ITEMTYPE AS ENUM ('HEALING', 'WEAPON', 'ARMOR');
+
 CREATE TYPE PLAYERRANK AS ENUM ('REGULAR', 'GOD', 'ADMIN');
 CREATE TYPE PLAYERCLASS AS ENUM ('DESTRUIR', 'RESTAURAR', 'INFILTRAR', 'NONE');
 
@@ -83,6 +97,10 @@ CREATE TABLE Map(
     name TEXT,
     description TEXT,
     type MAPTYPE,
+
+    region REGIONTYPE,
+    corruptionLevel CORRUPTIONLEVEL NOT NULL DEFAULT 0,
+
     storeId BIGINT,
     enemyId BIGINT,
     maxEnemies INTEGER,
@@ -135,14 +153,14 @@ CREATE TABLE Player(
     id BIGINT,
     name TEXT UNIQUE NOT NULL,
     pass TEXT,
-    rank PLAYERRANK, -- pra que
+    rank PLAYERRANK,
     class PLAYERCLASS DEFAULT 'NONE',
     statPoints INTEGER,
     experience INTEGER,
     level INTEGER,
     mapId BIGINT NOT NULL,
     money UBIGINT,
-    hitPoints INTEGER, --still has
+    hitPoints INTEGER,
     nextAttackTime BIGINT,
     attributes ATTRIBUTE,
     weaponId BIGINT,
@@ -162,7 +180,7 @@ CREATE TABLE Inventory(
     CONSTRAINT Inventory_Item_FK FOREIGN KEY(itemId) REFERENCES Item(id)
 );
 
--- Relação de amizade (bidirecional)
+-- Relação de amizade
 CREATE TABLE Friendship (
     playerId BIGINT NOT NULL,
     friendId BIGINT NOT NULL,
@@ -173,7 +191,7 @@ CREATE TABLE Friendship (
     CONSTRAINT Friendship_UQ UNIQUE (playerId, friendId)
 );
 
--- Grupos (para etapa 2)
+-- Grupos
 CREATE TABLE Party (
     id BIGSERIAL PRIMARY KEY,
     name TEXT,

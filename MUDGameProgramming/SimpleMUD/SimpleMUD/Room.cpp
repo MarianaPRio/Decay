@@ -18,10 +18,30 @@ using std::ostream;
 
 namespace SimpleMUD {
 
-Room::Room()
-    : m_type(PLAINROOM), m_data(0), m_description("UNDEFINED"), m_spawnwhich(0),
-      m_maxenemies(0), m_money(0), m_items(), m_players(), m_enemies() {
+RegionType GetRegionType(const std::string& s)
+{
+  if (s == "NUCLEO_INICIAL")              return REGION_NUCLEO_INICIAL;
+  if (s == "MALHA_URBANA_ESTATICA")       return REGION_MALHA_URBANA_ESTATICA;
+  if (s == "SUBCAMADAS_PROCESSAMENTO")    return REGION_SUBCAMADAS_PROCESSAMENTO;
+  if (s == "SETOR_FLORESTAL_PROCEDURAL")  return REGION_SETOR_FLORESTAL_PROCEDURAL;
+  if (s == "MAR_DE_DADOS")                return REGION_MAR_DE_DADOS;
+  if (s == "NUCLEO_ABISSAL")              return REGION_NUCLEO_ABISSAL;
+  return REGION_UNKNOWN;
+}
 
+Room::Room()
+    : m_type(PLAINROOM),
+      m_data(0),
+      m_description("UNDEFINED"),
+      m_spawnwhich(0),
+      m_maxenemies(0),
+      m_region(REGION_UNKNOWN),
+      m_corruptionLevel(0),
+      m_money(0),
+      m_items(),
+      m_players(),
+      m_enemies()
+{
   for (int d = 0; d < NUMDIRECTIONS; d++)
     m_rooms[d] = 0;
 }
@@ -99,8 +119,21 @@ void Room::LoadTemplate(const pqxx::const_result_iterator::reference &row,
   row["name"] >> m_name;
   row["description"] >> m_description;
   m_description = BasicLib::SearchAndReplace(m_description, "\\x1B", "\x1B");
+
   m_type = GetRoomType(row["type"].as<std::string>());
   m_data = (row["storeId"].is_null() ? 0 : row["storeId"].as<entityid>());
+
+  if (row["region"].is_null())
+    m_region = REGION_UNKNOWN;
+  else
+    m_region = GetRegionType(row["region"].as<std::string>());
+
+  // corruption level
+  if (row["corruptionLevel"].is_null())
+    m_corruptionLevel = 0;
+  else
+    m_corruptionLevel = row["corruptionLevel"].as<int>();
+
 
   for (int d = 0; d < NUMDIRECTIONS; d++)
     m_rooms[d] = 0;

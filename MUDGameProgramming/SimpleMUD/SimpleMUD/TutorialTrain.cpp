@@ -89,7 +89,7 @@ void TutorialTrain::PrintTutorial() {
     "--------------------------------- Training complete. "
     "-----------------------------------\r\n" +
     "> Uploading basic protocols...\r\n"+
-    " Welcome to SimpleMUD! This tutorial will help you get started.\r\n"+
+    " Welcome to The Grid! This tutorial will help you get started.\r\n"+
     "> Stand by...\r\n\r\n"+
     yellow + "── DECAY PROTOCOL: INITIATION SEQUENCE ──\r\n"+
     "Welcome to the decayed network.\r\n"+
