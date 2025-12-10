@@ -1,56 +1,105 @@
-# UnMUD
+# Decay Protocol
 
-O UnMUD é um Multi-User Dungeon (MUD) desenvolvido como Projeto de Pesquisa e Trabalho de Conclusão de Curso do aluno [Iuri Severo](https://github.com/iurisevero), da Universidade de Brasília. Seu código teve como base o SimpleMUD, disponibilizado por Ron Penton em seu livro “MUD Game Programming”, e foi evoluído para se enquadrar na diretrizes do C++, além de seguir a boas práticas adotadas pela comunidade.
+**Decay Protocol** é uma reinterpretação contemporânea dos jogos do tipo **Multi-User Dungeon (MUD)**. O projeto combina comandos textuais, interface gráfica em **Unity** e narrativa interativa em um ambiente cliente–servidor desenvolvido em **C++**. A iniciativa dá continuidade ao projeto **UnMUD**, modernizando sua base e ampliando seu escopo técnico e conceitual.
 
-Esse projeto foi desenvolvido com o objetivo principal de tornar a base de códigos de um MUD implantável, para que outros estudantes possam explorá-la e evoluí-la conforme desejarem, dando a eles a oportunidade de jogar, testar e analisar o jogo, a fim de compreender mais profundamente seu desenvolvimento, arquitetura e outros aspectos relevantes de seu software. Devido ao seu aspecto multidisciplinar e seu potencial evolutivo, MUDs se enquandram bem nessa função de "material de estudo".
+## Objetivo
 
-A monografia <!-- e o relatório de pesquisa --> resultante desse projeto pode ser acessado no link: [TCC](https://bdm.unb.br/handle/10483/39147). <!-- [PIBIC](). -->
+O projeto tem como objetivo explorar formas de modernizar MUDs clássicos, preservando sua essência textual, mas integrando elementos visuais, estruturais e narrativos adequados às expectativas de jogadores contemporâneos.  
+Foi desenvolvido como Trabalho de Conclusão de Curso em Engenharia de Software na Universidade de Brasília (UnB), resultando em um protótipo funcional, avaliado tecnicamente e por meio de testes com usuários:contentReference[oaicite:0]{index=0}.
 
-## Documentação
+## Principais Funcionalidades
 
-Toda documentação referente ao projeto pode ser visto em seu [site no GitHub Pages](https://unmud.github.io/UnMUD/#/). Caso você seja novo por aqui, alguns links interessantes de dar uma olhada caso você esteja interessado em:
+- **Cliente Unity e terminal textual integrado**  
+  Interface gráfica minimalista com painel de saída, campo de comandos e indicadores de status. A comunicação com o servidor ocorre via **sockets TCP**, permitindo interação em tempo real:contentReference[oaicite:1]{index=1}.
 
-* [Contribuir com o projeto](https://unmud.github.io/UnMUD/#/contributionGuide)
-* [Jogar UnMUD](https://unmud.github.io/UnMUD/#/game)
+- **Sistema de classes jogáveis**  
+  Implementação de arquétipos com atributos distintos, proporcionando variação estratégica entre estilos de jogo.
 
-<!-- É sempre bom também dar uma olhada nosso [Código de Conduta](https://unmud.github.io/UnMUD/#/) antes de interagir com a comunidade! -->
+- **Mecânica de corrupção por área**  
+  Cada região do mundo possui um nível de corrupção que altera o comportamento de inimigos e a estabilidade do jogador:contentReference[oaicite:2]{index=2}.
 
-## Área do suporte
+- **Mapa em camadas e progressão regional**  
+  Estrutura de mundo dividida em zonas, como Núcleo Inicial, Malha Urbana Estática, Setor Florestal Procedural e Núcleo Abissal, com ambientações e desafios progressivos.
 
-A área de discussões do GitHub está aberta para o esclarecimento de quaisquer dúvidas relacionadas ao projeto.
+- **Sistema de socialização (em desenvolvimento)**  
+  Núcleo funcional de amizades entre jogadores, com estrutura prevista para grupos e clãs, visando ampliar a colaboração e a dimensão social da experiência:contentReference[oaicite:3]{index=3}.
 
-<!-- ## Requisitos mínimos: 
-nesse tópico, são apresentados quais são os requisitos mínimos para se executar o projeto, e -->
+## Arquitetura
 
-## Tecnologias utilizadas
+A arquitetura é composta por três camadas principais:
 
-O UnMUD foi desenvolvido utilizando C++ como sua principal linguagem, na versão C++XX. O código foi atualizado para seguir as diretrizes especificadas no [C++ Core Guidelines](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#main) e deve funcionar em versões superiores a especificada, porém é possível que haja erros de compilação em versões anteriores.
+**Servidor C++ (baseado no UnMUD)**  
+Responsável pela lógica de jogo, persistência e comunicação em rede. O código foi modernizado, modularizado e adaptado às diretrizes atuais da linguagem:contentReference[oaicite:4]{index=4}.
 
-Para criar um ambiente de desenvolvimento isolado foram utilizadas as ferramentas [Docker](https://www.docker.com/) e [Docker Compose](https://docs.docker.com/compose/). Caso você não possua essas ferramentas, é possível instalá-la seguindo suas documentações oficiais:
+**Cliente Unity (C#)**  
+Responsável pela interface visual, interpretação de comandos e exibição do estado do jogo. Utiliza **TextMeshPro**, **Canvas** e scripts de gerenciamento de sessão e eventos:contentReference[oaicite:5]{index=5}.
 
-* Arch: [Docker Desktop](https://docs.docker.com/desktop/install/archlinux/); [Docker Engine](https://wiki.archlinux.org/title/docker#Installation); [Docker Compose](https://wiki.archlinux.org/title/docker#Docker_Compose)
-* Ubuntu: [Docker Desktop](https://docs.docker.com/desktop/install/ubuntu/); [Docker Engine](https://docs.docker.com/engine/install/ubuntu/); [Docker Compose](https://docs.docker.com/compose/install/linux/#install-using-the-repository)
-* Windows: [Docker Desktop](https://docs.docker.com/desktop/install/windows-install/)
-* Mac: [Docker Desktop](https://docs.docker.com/desktop/install/mac-install/)
+**Banco de Dados PostgreSQL**  
+Gerencia as entidades persistentes, incluindo jogadores, itens, inimigos, áreas e conexões de amizade. Os scripts SQL incluem tabelas, chaves estrangeiras e dados iniciais para testes.
 
-Também foi utilizada a ferramenta [Make](https://www.gnu.org/software/make/) para compilação e linkagem dos códigos, assim como a geração de arquivo um executável. Não é necessária a instalação dessas ferramentas para execução do programa, uma vez que o ambiente de desenvolvimento é levantado de forma isolada pelo Docker.
+## Tecnologias Utilizadas
 
-Para análise estática de código foram utilizadas as ferramentas:
+- **Linguagens:** C++, C#  
+- **Motor:** Unity  
+- **Banco de dados:** PostgreSQL  
+- **Infraestrutura:** Docker, Docker Compose  
+- **Qualidade de código:** GoogleTest, Cppcheck, Clang-Tidy, SonarQube, GitHub Actions:contentReference[oaicite:6]{index=6}.
 
-* [Cppcheck](https://cppcheck.sourceforge.io/): O Cppcheck é uma ferramenta de análise estática usada para analisar códigos C/C++. Ela fornece recursos de análise de código distintos para identificar erros de programação e se concentra na detecção de comportamentos indefinidos e práticas de codificação potencialmente perigosas.
-* [Clang Tidy](https://clang.llvm.org/extra/clang-tidy/): O clang-tidy é uma ferramenta de "linter" para C++ baseada em clang. Seu propósito é fornecer um framework extensível para diagnosticar e corrigir erros típicos de programação, como violações de estilo, uso incorreto de interface ou _bugs_ que podem ser deduzidos por meio de análise estática.
-* [Clang Format](https://clang.llvm.org/docs/ClangFormat.html): ClangFormat é uma ferramenta desenvolvida a partir da LibFormat, uma biblioteca que implementa formatação automática de código-fonte baseada no Clang.
+## Execução do Projeto
 
-E para realização de testes unitários foi utilizado o framework [GoogleTest](https://google.github.io/googletest/primer.html), em conjunto com a ferramenta [gcovr](https://gcovr.com/en/stable/) para análise da cobertura de testes.
+### Pré-requisitos
 
-A integração contínua e o deploy foram realizados com o auxílio do [GitHub Actions](https://github.com/features/actions).
+- Docker e Docker Compose instalados  
+- Unity (versão compatível com o cliente do projeto)
 
-## Contribuidores
+### Inicialização
 
-Obrigado a todos que já contribuiram!
+1. Clone o repositório:
+   ```bash
+   git clone https://github.com/MarianaPRio/Decay.git
+   cd Decay
 
-<a href = "https://github.com/UnMUD/UnMUD/issues/graphs/contributors">
-  <img src = "https://contrib.rocks/image?repo=UnMUD/UnMUD"/>
-</a>
+2. Abrir o cliente Unity, configurar o endereço IP e porta do servidor nos scripts de conexão (se necessário).
 
-Feito com [contributors-img](https://contrib.rocks).
+3. Executar a cena principal no Unity e interagir com o jogo por meio do terminal e da interface gráfica.
+
+## Organização do Repositório
+
+- `MUDGameProgramming/` – código do servidor em C++  
+- `Unity/` – cliente gráfico do jogo em Unity (nome da pasta pode variar conforme sua organização local)  
+- `SQL/` – scripts de criação e população do banco de dados  
+- `docs/` – documentação complementar e notas técnicas  
+- `Logs/` – registros de execução e depuração  
+
+
+## Avaliação e Resultados
+
+O protótipo foi utilizado em testes com jogadores, que percorreram o fluxo inicial de jogo (login, movimentação, combate e interação pela interface gráfica) e responderam a um questionário estruturado.
+
+De forma geral, os resultados indicaram:
+
+- boa aceitação da proposta de modernização de um MUD clássico;  
+- clareza dos comandos e legibilidade da interface;  
+- estabilidade técnica durante as sessões de teste;  
+- interesse em maior aprofundamento narrativo, mais variedade de inimigos e mais feedbacks visuais.
+
+Esses resultados reforçam o potencial do Decay Protocol como base para estudos e para evolução futura do sistema.
+
+## Trabalhos Futuros
+
+Entre as possibilidades de continuidade, destacam-se:
+
+- expansão do conteúdo narrativo e das regiões do mapa;  
+- implementação completa de grupos e clãs;  
+- inclusão de novos inimigos, itens e mecânicas de progressão;  
+- enriquecimento de feedbacks visuais e efeitos relacionados à corrupção por área;  
+- disponibilização do servidor em ambiente público para testes com maior número de jogadores.
+
+## Referência Acadêmica
+
+Monografia:
+
+**Decay Protocol: modernização de MUDs clássicos com cliente Unity e servidor em C++**  
+Curso de Engenharia de Software – Universidade de Brasília (UnB), 2025.
+
+O trabalho parte da base do projeto **UnMUD** e explora o Decay Protocol como estudo de caso em modernização de MUDs, integrando terminal textual, interface gráfica e novas mecânicas de jogo.
