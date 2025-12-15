@@ -101,11 +101,11 @@ INSERT INTO Map (id, name, description, type, region, corruptionLevel, storeId, 
 
     (2, 'Initial Core: Sync Corridor',
         'A corridor of floating panels displays error messages a...s relatively stable, but something moves between the glitches.',
-        'PLAINROOM', 'NUCLEO_INICIAL', 0, NULL, 1, 1),
+        'PLAINROOM', 'NUCLEO_INICIAL', 0, NULL, NULL, 0),
 
     (3, 'Initial Core: Training Room',
         'Old terminals project text tutorials. A virtual instructor watches your movements and offers controlled challenges.',
-        'TRAININGROOM', 'NUCLEO_INICIAL', 0, NULL, 1, 1),
+        'TRAININGROOM', 'NUCLEO_INICIAL', 0, NULL, NULL, 0),
 
     (4, 'Initial Core: Supply Node',
         'A cluster of surviving commercial consoles still sells basic equipment for the simulation.',
@@ -281,8 +281,6 @@ INSERT INTO MapVolatile VALUES
     (26, 0), (27, 0), (28, 0), (29, 0), (30, 0);
 
 INSERT INTO EnemyInstance (id, templateId, hitPoints, mapId, nextAttackTime) VALUES
-    (1,  1,   6,  2, 0),
-    (2,  1,   6,  3, 0),
 
     (3,  2,  20,  5, 0),
     (4,  2,  20,  6, 0),
@@ -295,14 +293,14 @@ INSERT INTO EnemyInstance (id, templateId, hitPoints, mapId, nextAttackTime) VAL
     (10, 3,  28, 13, 0),
     (11, 3,  28, 14, 0),
     (12, 3,  28, 15, 0),
-    (13, 3,  28, 16, 0),
 
+    (13, 3,  28, 16, 0),
     (14, 4,  24, 17, 0),
     (15, 4,  24, 19, 0),
     (16, 4,  24, 20, 0),
     (17, 4,  24, 21, 0),
-    (18, 4,  24, 22, 0),
 
+    (18, 4,  24, 22, 0),
     (19, 5, 180, 23, 0),
     (20, 5, 180, 25, 0),
     (21, 5, 180, 27, 0),
@@ -311,7 +309,7 @@ INSERT INTO EnemyInstance (id, templateId, hitPoints, mapId, nextAttackTime) VAL
     (23, 6, 120, 29, 0),
     (24, 6, 120, 30, 0);
 
-SELECT setval(pg_get_serial_sequence('EnemyInstance', 'id'), 25, false) FROM EnemyInstance;
+SELECT setval(pg_get_serial_sequence('EnemyInstance', 'id'), 22, false) FROM EnemyInstance;
 
 INSERT INTO Player
     (id, name, pass, rank, class, statPoints, experience, level,
